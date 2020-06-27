@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
-
 import os
 import signal
 import socket
 import sys
+from typing import List
 
 from PyQt5 import QtSvg, QtCore, QtWidgets, QtGui, QtNetwork
 
@@ -23,8 +22,6 @@ class SignalWakeupHandler(QtNetwork.QAbstractSocket):
         self.old_fd = signal.set_wakeup_fd(self.write_sock.fileno())
         # First Python code executed gets any exception from
         # the signal handler, so add a dummy handler first
-        print(type(self.readyRead))
-        print(dir(self.readyRead))
         # noinspection PyUnresolvedReferences
         self.readyRead.connect(lambda: None)
         # Second handler does the real handling
@@ -241,7 +238,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionPrev.setText("&Prev Tab")
 
 
-def main():
+def view_svgs(filenames: List[str]):
     app = QtWidgets.QApplication(sys.argv)
     SignalWakeupHandler(app)
     signal.signal(signal.SIGINT, lambda sig, _: app.quit())
@@ -249,11 +246,7 @@ def main():
     window = MainWindow()
     window.show()
 
-    for arg in sys.argv[1:]:
-        window.load(arg)
+    for filename in filenames:
+        window.load(filename)
 
     sys.exit(app.exec_())
-
-
-if __name__ == "__main__":
-    main()
