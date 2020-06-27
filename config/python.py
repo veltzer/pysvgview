@@ -26,6 +26,7 @@ dev_requires = [
     'pypitools',  # for upload etc
     'pydmt',  # for building
     'Sphinx',  # for the sphinx builder
+    'PyQt5-stubs',  # for development of Qt app
 ]
 
 install_requires = list(setup_requires)

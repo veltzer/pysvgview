@@ -16,14 +16,19 @@ class SignalWakeupHandler(QtNetwork.QAbstractSocket):
         # Create a socket pair
         self.write_sock, self.read_sock = socket.socketpair(type=socket.SOCK_DGRAM)
         # Let Qt listen on the one end
+        # noinspection PyTypeChecker
         self.setSocketDescriptor(self.read_sock.fileno())
         # And let Python write on the other end
         self.write_sock.setblocking(False)
         self.old_fd = signal.set_wakeup_fd(self.write_sock.fileno())
         # First Python code executed gets any exception from
         # the signal handler, so add a dummy handler first
+        print(type(self.readyRead))
+        print(dir(self.readyRead))
+        # noinspection PyUnresolvedReferences
         self.readyRead.connect(lambda: None)
         # Second handler does the real handling
+        # noinspection PyUnresolvedReferences
         self.readyRead.connect(self._read_signal)
 
     def __del__(self):
@@ -45,7 +50,7 @@ class SignalWakeupHandler(QtNetwork.QAbstractSocket):
 class SvgWidget(QtSvg.QSvgWidget):
     location_changed = QtCore.pyqtSignal(QtCore.QPointF)
 
-    def updateViewBox(self, size):
+    def update_view_box(self, size):
         w = self.scale * size.width()
         h = self.scale * size.height()
         r = QtCore.QRectF(self.center_x - w / 2, self.center_y - h / 2,
@@ -57,16 +62,16 @@ class SvgWidget(QtSvg.QSvgWidget):
                          float(self.defViewBox.height()) / self.height())
         self.center_x = self.defViewBox.center().x()
         self.center_y = self.defViewBox.center().y()
-        self.updateViewBox(self.size())
+        self.update_view_box(self.size())
         self.repaint()
 
     def reload(self):
         QtSvg.QSvgWidget.load(self, self.path)
         self.defViewBox = self.renderer().viewBoxF()
-        self.updateViewBox(self.size())
+        self.update_view_box(self.size())
 
     def resizeEvent(self, evt):
-        self.updateViewBox(evt.size())
+        self.update_view_box(evt.size())
         QtSvg.QSvgWidget.resizeEvent(self, evt)
 
     def __init__(self, path):
@@ -74,6 +79,7 @@ class SvgWidget(QtSvg.QSvgWidget):
         self.path = path
         self.watch = QtCore.QFileSystemWatcher(self)
         self.watch.addPath(self.path)
+        # noinspection PyUnresolvedReferences
         self.watch.fileChanged.connect(self.reload)
 
         self.setMouseTracking(True)
@@ -89,7 +95,7 @@ class SvgWidget(QtSvg.QSvgWidget):
         self.defViewBox = self.renderer().viewBoxF()
         self.center()
 
-    def updateLocation(self, pos):
+    def update_location(self, pos):
         self.location_changed.emit(QtCore.QPointF(
             (pos.x() - self.width() / 2) * self.scale + self.center_x,
             (pos.y() - self.height() / 2) * self.scale + self.center_y))
@@ -102,8 +108,8 @@ class SvgWidget(QtSvg.QSvgWidget):
         self.scale = self.scale * 1.0025 ** (-evt.angleDelta().y())
         self.center_x = center_x - dx * self.scale
         self.center_y = center_y - dy * self.scale
-        self.updateViewBox(self.size())
-        self.updateLocation(evt.pos())
+        self.update_view_box(self.size())
+        self.update_location(evt.pos())
         self.repaint()
 
     def mousePressEvent(self, evt):
@@ -113,14 +119,14 @@ class SvgWidget(QtSvg.QSvgWidget):
 
     def mouseMoveEvent(self, evt):
         # print(dir(evt))
-        self.updateLocation(evt.pos())
+        self.update_location(evt.pos())
         if not self.ds:
             return
         dx = evt.pos().x() - self.ds.x()
         dy = evt.pos().y() - self.ds.y()
         self.center_x = self.start_center_x - dx * self.scale
         self.center_y = self.start_center_y - dy * self.scale
-        self.updateViewBox(self.size())
+        self.update_view_box(self.size())
         self.repaint()
 
     def mouseReleaseEvent(self, evt):
@@ -130,14 +136,14 @@ class SvgWidget(QtSvg.QSvgWidget):
 
 class MainWindow(QtWidgets.QMainWindow):
 
-    def showLocation(self, point):
+    def show_location(self, point):
         self.statusbar.showMessage("{} {}".format(point.x(), point.y()))
 
     def load(self, path):
         view = SvgWidget(path)
         self.tabs.setCurrentIndex(self.tabs.addTab(view, os.path.basename("%s" % path)))
 
-    def closeTab(self):
+    def tab_close(self):
         if not self.tabs.currentWidget():
             return
         self.tabs.removeTab(self.tabs.currentIndex())
@@ -152,12 +158,12 @@ class MainWindow(QtWidgets.QMainWindow):
             return
         self.tabs.currentWidget().reload()
 
-    def nextTab(self):
+    def tab_next(self):
         if not self.tabs.currentWidget():
             return
         self.tabs.setCurrentIndex((self.tabs.currentIndex() + 1) % self.tabs.count())
 
-    def prevTab(self):
+    def tab_prev(self):
         if not self.tabs.currentWidget():
             return
         self.tabs.setCurrentIndex((self.tabs.currentIndex() - 1) % self.tabs.count())
@@ -176,7 +182,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tabs = QtWidgets.QTabWidget(self)
         self.tabs.setMovable(True)
         self.tabs.setTabsClosable(True)
-        self.tabs.tabCloseRequested.connect(self.closeTab)
+        self.tabs.tabCloseRequested.connect(self.tab_close)
         self.setCentralWidget(self.tabs)
         self.resize(800, 600)
         self.statusbar = QtWidgets.QStatusBar(self)
@@ -216,11 +222,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.actionCenter.triggered.connect(self.center)
         self.actionReload.triggered.connect(self.reload)
-        self.actionNext.triggered.connect(self.nextTab)
-        self.actionPrev.triggered.connect(self.prevTab)
+        self.actionNext.triggered.connect(self.tab_next)
+        self.actionPrev.triggered.connect(self.tab_prev)
+        # noinspection PyTypeChecker
         self.actionQuit.triggered.connect(self.close)
         self.actionOpen.triggered.connect(self.open)
-        self.actionClose.triggered.connect(self.closeTab)
+        self.actionClose.triggered.connect(self.tab_close)
 
         self.setWindowTitle("Svg Viewer")
         self.menuFile.setTitle("&File")
