@@ -9,8 +9,10 @@ def get_readme():
 setuptools.setup(
     # the first three fields are a must according to the documentation
     name="pysvgview",
-    version="0.0.1",
+    version="0.0.2",
     packages=[
+        'pysvgview',
+        'pysvgview.endpoints',
     ],
     # from here all is optional
     description="pysvgview is an SVG viewer",
