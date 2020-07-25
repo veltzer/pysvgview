@@ -2,7 +2,7 @@
 The default group of operations that pysvgview has
 """
 
-from pytconf.config import register_endpoint, register_function_group, get_free_args
+from pytconf import register_endpoint, register_function_group, get_free_args
 
 import pysvgview.version
 from pysvgview.svg_view import view_svgs
