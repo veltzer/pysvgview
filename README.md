@@ -16,6 +16,8 @@
 ![Downloads](https://pepy.tech/badge/pysvgview/month)
 ![Downloads](https://pepy.tech/badge/pysvgview/week)
 
+[![Known Vulnerabilities](https://snyk.io/test/github/veltzer/pysvgview/badge.svg?targetFile=requirements.txt)](https://snyk.io/test/github/veltzer/pysvgview?targetFile=requirements.txt)
+
 
 
 pysvgview is an SVG viewer
