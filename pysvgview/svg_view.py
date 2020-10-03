@@ -1,3 +1,4 @@
+import enum
 import os
 import signal
 import socket
@@ -5,6 +6,16 @@ import sys
 from typing import List
 
 from PyQt5 import QtSvg, QtCore, QtWidgets, QtGui, QtNetwork
+
+
+class ActionTypes(enum.Enum):
+    OPEN = 1
+    CLOSE = 2
+    QUIT = 3
+    CENTER = 4
+    RELOAD = 5
+    NEXT = 6
+    PREV = 7
 
 
 class SignalWakeupHandler(QtNetwork.QAbstractSocket):
@@ -76,7 +87,6 @@ class SvgWidget(QtSvg.QSvgWidget):
         self.path = path
         self.watch = QtCore.QFileSystemWatcher(self)
         self.watch.addPath(self.path)
-        # noinspection PyUnresolvedReferences
         self.watch.fileChanged.connect(self.reload)
 
         self.setMouseTracking(True)
@@ -175,20 +185,20 @@ class MainWindow(QtWidgets.QMainWindow):
             self.load(path)
 
     def create_actions(self):
-        self.actionOpen = QtWidgets.QAction(self)
-        self.actionOpen.setShortcuts(QtGui.QKeySequence.Open)
-        self.actionQuit = QtWidgets.QAction(self)
-        self.actionQuit.setShortcuts(QtGui.QKeySequence.Quit)
-        self.actionClose = QtWidgets.QAction(self)
-        self.actionClose.setShortcuts(QtGui.QKeySequence.Close)
-        self.actionCenter = QtWidgets.QAction(self)
-        self.actionCenter.setShortcuts(QtGui.QKeySequence("Space"))
-        self.actionReload = QtWidgets.QAction(self)
-        self.actionReload.setShortcuts(QtGui.QKeySequence("F5"))
-        self.actionNext = QtWidgets.QAction(self)
-        self.actionNext.setShortcuts(QtGui.QKeySequence("Page Down"))
-        self.actionPrev = QtWidgets.QAction(self)
-        self.actionPrev.setShortcuts(QtGui.QKeySequence("Page Up"))
+        self.actions[ActionTypes.OPEN] = QtWidgets.QAction(self)
+        self.actions[ActionTypes.OPEN].setShortcuts(QtGui.QKeySequence.Open)
+        self.actions[ActionTypes.QUIT] = QtWidgets.QAction(self)
+        self.actions[ActionTypes.QUIT].setShortcuts(QtGui.QKeySequence.Quit)
+        self.actions[ActionTypes.CLOSE] = QtWidgets.QAction(self)
+        self.actions[ActionTypes.CLOSE].setShortcuts(QtGui.QKeySequence.Close)
+        self.actions[ActionTypes.CENTER] = QtWidgets.QAction(self)
+        self.actions[ActionTypes.CENTER].setShortcuts(QtGui.QKeySequence("Space"))
+        self.actions[ActionTypes.RELOAD] = QtWidgets.QAction(self)
+        self.actions[ActionTypes.RELOAD].setShortcuts(QtGui.QKeySequence("F5"))
+        self.actions[ActionTypes.NEXT] = QtWidgets.QAction(self)
+        self.actions[ActionTypes.NEXT].setShortcuts(QtGui.QKeySequence("Page Down"))
+        self.actions[ActionTypes.PREV] = QtWidgets.QAction(self)
+        self.actions[ActionTypes.PREV].setShortcuts(QtGui.QKeySequence("Page Up"))
 
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
@@ -200,6 +210,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.resize(800, 600)
         self.statusbar = QtWidgets.QStatusBar(self)
         self.setStatusBar(self.statusbar)
+        self.actions = {}
 
         self.menubar = QtWidgets.QMenuBar(self)
         self.menuFile = QtWidgets.QMenu(self.menubar)
@@ -208,14 +219,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.create_actions()
 
-        self.menuFile.addAction(self.actionOpen)
+        self.menuFile.addAction(self.actions[ActionTypes.OPEN])
         self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionClose)
-        self.menuFile.addAction(self.actionQuit)
-        self.menuEdit.addAction(self.actionCenter)
-        self.menuEdit.addAction(self.actionReload)
-        self.menuEdit.addAction(self.actionNext)
-        self.menuEdit.addAction(self.actionPrev)
+        self.menuFile.addAction(self.actions[ActionTypes.CLOSE])
+        self.menuFile.addAction(self.actions[ActionTypes.CLOSE])
+        self.menuEdit.addAction(self.actions[ActionTypes.CENTER])
+        self.menuEdit.addAction(self.actions[ActionTypes.RELOAD])
+        self.menuEdit.addAction(self.actions[ActionTypes.NEXT])
+        self.menuEdit.addAction(self.actions[ActionTypes.PREV])
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
 
@@ -223,7 +234,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionReload.triggered.connect(self.reload)
         self.actionNext.triggered.connect(self.tab_next)
         self.actionPrev.triggered.connect(self.tab_prev)
-        # noinspection PyTypeChecker
         self.actionQuit.triggered.connect(self.close)
         self.actionOpen.triggered.connect(self.open)
         self.actionClose.triggered.connect(self.tab_close)
