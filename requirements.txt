@@ -12,4 +12,6 @@ PyQt5-stubs
 # test requirements
 pylint
 pytest
-pyflakes
+pytest-cov
+flake8
+pymakehelper

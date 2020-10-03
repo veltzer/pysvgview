@@ -174,6 +174,22 @@ class MainWindow(QtWidgets.QMainWindow):
         if path:
             self.load(path)
 
+    def create_actions(self):
+        self.actionOpen = QtWidgets.QAction(self)
+        self.actionOpen.setShortcuts(QtGui.QKeySequence.Open)
+        self.actionQuit = QtWidgets.QAction(self)
+        self.actionQuit.setShortcuts(QtGui.QKeySequence.Quit)
+        self.actionClose = QtWidgets.QAction(self)
+        self.actionClose.setShortcuts(QtGui.QKeySequence.Close)
+        self.actionCenter = QtWidgets.QAction(self)
+        self.actionCenter.setShortcuts(QtGui.QKeySequence("Space"))
+        self.actionReload = QtWidgets.QAction(self)
+        self.actionReload.setShortcuts(QtGui.QKeySequence("F5"))
+        self.actionNext = QtWidgets.QAction(self)
+        self.actionNext.setShortcuts(QtGui.QKeySequence("Page Down"))
+        self.actionPrev = QtWidgets.QAction(self)
+        self.actionPrev.setShortcuts(QtGui.QKeySequence("Page Up"))
+
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
         self.tabs = QtWidgets.QTabWidget(self)
@@ -190,21 +206,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuEdit = QtWidgets.QMenu(self.menubar)
         self.setMenuBar(self.menubar)
 
-        self.actionOpen = QtWidgets.QAction(self)
-        self.actionOpen.setShortcuts(QtGui.QKeySequence.Open)
-        self.actionQuit = QtWidgets.QAction(self)
-        self.actionQuit.setShortcuts(QtGui.QKeySequence.Quit)
-        self.actionClose = QtWidgets.QAction(self)
-        self.actionClose.setShortcuts(QtGui.QKeySequence.Close)
-        self.actionCenter = QtWidgets.QAction(self)
-        self.actionCenter.setShortcuts(QtGui.QKeySequence("Space"))
-        self.actionReload = QtWidgets.QAction(self)
-        self.actionReload.setShortcuts(QtGui.QKeySequence("F5"))
-
-        self.actionNext = QtWidgets.QAction(self)
-        self.actionNext.setShortcuts(QtGui.QKeySequence("Page Down"))
-        self.actionPrev = QtWidgets.QAction(self)
-        self.actionPrev.setShortcuts(QtGui.QKeySequence("Page Up"))
+        self.create_actions()
 
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()

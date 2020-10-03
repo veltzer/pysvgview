@@ -3,7 +3,7 @@ import config.project
 package_name = config.project.project_name
 
 console_scripts = [
-    'pysvgview=pysvgview.endpoints.main:main',
+    'pysvgview=pysvgview.main:main',
 ]
 
 setup_requires = [
@@ -18,7 +18,9 @@ run_requires = [
 test_requires = [
     'pylint',  # to check for lint errors
     'pytest',  # for testing
-    'pyflakes',  # for testing
+    'pytest-cov',  # for testing
+    'flake8',  # for linting
+    'pymakehelper',  # for make
 ]
 
 dev_requires = [

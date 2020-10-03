@@ -9,10 +9,9 @@ def get_readme():
 setuptools.setup(
     # the first three fields are a must according to the documentation
     name="pysvgview",
-    version="0.0.3",
+    version="0.0.4",
     packages=[
         'pysvgview',
-        'pysvgview.endpoints',
     ],
     # from here all is optional
     description="pysvgview is an SVG viewer",
@@ -56,7 +55,7 @@ setuptools.setup(
     data_files=[
     ],
     entry_points={"console_scripts": [
-        'pysvgview=pysvgview.endpoints.main:main',
+        'pysvgview=pysvgview.main:main',
     ]},
     python_requires=">=3.6",
 )
