@@ -2,3 +2,4 @@
 VERSION_STR = "0.0.4"
 DESCRIPTION = "pysvgview is an SVG viewer"
 APP_NAME = "pysvgview"
+LOGGER_NAME = "pysvgview"
