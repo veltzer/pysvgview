@@ -14,7 +14,6 @@
 ![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 ![build](https://github.com/veltzer/pysvgview/workflows/build/badge.svg)
-
 pysvgview is an SVG viewer
 
 project website: https://veltzer.github.io/pysvgview
