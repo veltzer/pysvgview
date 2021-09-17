@@ -144,11 +144,11 @@ class SvgWidget(QtSvg.QSvgWidget):
 class MainWindow(QtWidgets.QMainWindow):
 
     def show_location(self, point):
-        self.statusbar.showMessage("{} {}".format(point.x(), point.y()))
+        self.statusbar.showMessage(f"{point.x()} {point.y()}")
 
     def load(self, path):
         view = SvgWidget(path)
-        self.tabs.setCurrentIndex(self.tabs.addTab(view, os.path.basename("%s" % path)))
+        self.tabs.setCurrentIndex(self.tabs.addTab(view, os.path.basename(path)))
 
     def tab_close(self):
         if not self.tabs.currentWidget():
