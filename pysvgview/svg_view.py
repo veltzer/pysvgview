@@ -33,11 +33,10 @@ class SignalWakeupHandler(QtNetwork.QAbstractSocket):
         self.old_fd = signal.set_wakeup_fd(self.write_sock.fileno())
         # First Python code executed gets any exception from
         # the signal handler, so add a dummy handler first
-        # noinspection PyUnresolvedReferences
-        self.readyRead.connect(lambda: None)
+        self.readyRead.connect(lambda: None, None)
         # Second handler does the real handling
         # noinspection PyUnresolvedReferences
-        self.readyRead.connect(self._read_signal)
+        self.readyRead.connect(self._read_signal, None)
 
     def __del__(self):
         # Restore any old handler on deletion
@@ -87,7 +86,7 @@ class SvgWidget(QtSvg.QSvgWidget):
         self.path = path
         self.watch = QtCore.QFileSystemWatcher(self)
         self.watch.addPath(self.path)
-        self.watch.fileChanged.connect(self.reload)
+        self.watch.fileChanged.connect(self.reload, None)
 
         self.setMouseTracking(True)
         self.ds = None
@@ -205,7 +204,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tabs = QtWidgets.QTabWidget(self)
         self.tabs.setMovable(True)
         self.tabs.setTabsClosable(True)
-        self.tabs.tabCloseRequested.connect(self.tab_close)
+        self.tabs.tabCloseRequested.connect(self.tab_close, None)
         self.setCentralWidget(self.tabs)
         self.resize(800, 600)
         self.statusbar = QtWidgets.QStatusBar(self)
