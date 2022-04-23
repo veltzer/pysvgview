@@ -2,6 +2,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.stamp
+/inspections
+/wheel
+
+/.myenv.pip.errors
+
 /.pydmt/
 
 # C extensions
@@ -128,3 +134,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/node_modules/
