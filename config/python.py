@@ -6,7 +6,7 @@ console_scripts = [
     "pysvgview=pysvgview.main:main",
 ]
 
-run_requires = [
+install_requires = [
     "PyQt5",
     "pytconf",
     "pylogconf",
