@@ -32,13 +32,6 @@ setuptools.setup(
     platforms=[
         'python3',
     ],
-    install_requires=[
-        'PyQt5',
-        'pytconf',
-        'pylogconf',
-    ],
-    extras_require={
-    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
