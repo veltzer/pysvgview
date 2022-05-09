@@ -5,7 +5,7 @@ import socket
 import sys
 from typing import List
 
-from PyQt5 import QtSvg, QtCore, QtWidgets, QtGui, QtNetwork
+from PyQt6 import QtSvg, QtCore, QtWidgets, QtGui, QtNetwork
 
 
 class ActionTypes(enum.Enum):

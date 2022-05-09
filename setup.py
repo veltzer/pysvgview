@@ -32,6 +32,11 @@ setuptools.setup(
     platforms=[
         'python3',
     ],
+    install_requires=[
+        'PyQt6',
+        'pytconf',
+        'pylogconf',
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
@@ -48,5 +53,5 @@ setuptools.setup(
     entry_points={"console_scripts": [
         'pysvgview=pysvgview.main:main',
     ]},
-    python_requires=">=3.9",
+    python_requires=">=3.10",
 )

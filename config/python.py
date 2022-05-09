@@ -13,7 +13,7 @@ dev_requires = [
     "PyQt5-stubs",
 ]
 install_requires = [
-    "PyQt5",
+    "PyQt6",
     "pytconf",
     "pylogconf",
 ]
