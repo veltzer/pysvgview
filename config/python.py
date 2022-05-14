@@ -10,9 +10,9 @@ dev_requires = [
     "pypitools",
     "pydmt",
     "Sphinx",
-    "PyQt5-stubs",
 ]
 install_requires = [
+    # "PyQt6-stubs",
     "PyQt6",
     "pytconf",
     "pylogconf",

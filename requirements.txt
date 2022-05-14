@@ -8,7 +8,6 @@ pyclassifiers
 pypitools
 pydmt
 Sphinx
-PyQt5-stubs
 # test requirements
 pylint
 pytest
