@@ -1,4 +1,4 @@
-short_description = "pysvgview is an SVG viewer"
+description_short = "pysvgview is an SVG viewer"
 keywords = [
     "svg",
     "view",
