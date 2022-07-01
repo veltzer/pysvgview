@@ -10,6 +10,7 @@ dev_requires = [
 install_requires = [
     # "PyQt6-stubs",
     "PyQt6",
+    "PySide6",
     "pytconf",
     "pylogconf",
 ]

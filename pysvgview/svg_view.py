@@ -1,11 +1,13 @@
 import enum
 import os
-import signal
-import socket
 import sys
 from typing import List
 
-from PyQt6 import QtSvg, QtCore, QtWidgets, QtGui, QtNetwork
+# pylint: disable=no-name-in-module
+from PySide6.QtSvgWidgets import QSvgWidget
+from PyQt6.QtWidgets import QMenuBar, QMenu, QMainWindow, QFileDialog, QStatusBar, QTabWidget, QApplication
+from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, QFileSystemWatcher
+from PyQt6.QtGui import QAction, QPalette, QColorConstants
 
 
 class ActionTypes(enum.Enum):
@@ -18,50 +20,13 @@ class ActionTypes(enum.Enum):
     PREV = 7
 
 
-class SignalWakeupHandler(QtNetwork.QAbstractSocket):
-
-    def __init__(self, parent=None):
-        super().__init__(QtNetwork.QAbstractSocket.UdpSocket, parent)
-        self.old_fd = None
-        # Create a socket pair
-        self.write_sock, self.read_sock = socket.socketpair(type=socket.SOCK_DGRAM)
-        # Let Qt listen on the one end
-        # noinspection PyTypeChecker
-        self.setSocketDescriptor(self.read_sock.fileno())
-        # And let Python write on the other end
-        self.write_sock.setblocking(False)
-        self.old_fd = signal.set_wakeup_fd(self.write_sock.fileno())
-        # First Python code executed gets any exception from
-        # the signal handler, so add a dummy handler first
-        self.readyRead.connect(lambda: None, None)
-        # Second handler does the real handling
-        # noinspection PyUnresolvedReferences
-        self.readyRead.connect(self._read_signal, None)
-
-    def __del__(self):
-        # Restore any old handler on deletion
-        if self.old_fd is not None and signal and signal.set_wakeup_fd:
-            signal.set_wakeup_fd(self.old_fd)
-
-    def _read_signal(self):
-        # Read the written byte.
-        # Note: readyRead is blocked from occurring again until readData()
-        # was called, so call it, even if you don't need the value.
-        data = self.readData(1)
-        # Emit a Qt signal for convenience
-        self.signalReceived.emit(data[0])
-
-    signalReceived = QtCore.pyqtSignal(int)
-
-
-class SvgWidget(QtSvg.QSvgWidget):
-    location_changed = QtCore.pyqtSignal(QtCore.QPointF)
+class SvgWidget(QSvgWidget):
+    location_changed = pyqtSignal(QPointF)
 
     def update_view_box(self, size):
         w = self.scale * size.width()
         h = self.scale * size.height()
-        r = QtCore.QRectF(self.center_x - w / 2, self.center_y - h / 2,
-                          w, h)
+        r = QRectF(self.center_x - w / 2, self.center_y - h / 2, w, h)
         self.renderer().setViewBox(r)
 
     def center(self):
@@ -73,18 +38,18 @@ class SvgWidget(QtSvg.QSvgWidget):
         self.repaint()
 
     def reload(self):
-        QtSvg.QSvgWidget.load(self, self.path)
+        QSvgWidget.load(self, self.path)
         self.defViewBox = self.renderer().viewBoxF()
         self.update_view_box(self.size())
 
     def resizeEvent(self, evt):
         self.update_view_box(evt.size())
-        QtSvg.QSvgWidget.resizeEvent(self, evt)
+        QSvgWidget.resizeEvent(self, evt)
 
     def __init__(self, path):
-        QtSvg.QSvgWidget.__init__(self)
+        QSvgWidget.__init__(self)
         self.path = path
-        self.watch = QtCore.QFileSystemWatcher(self)
+        self.watch = QFileSystemWatcher(self)
         self.watch.addPath(self.path)
         self.watch.fileChanged.connect(self.reload, None)
 
@@ -95,14 +60,14 @@ class SvgWidget(QtSvg.QSvgWidget):
         self.center_y = 0
         self.start_center_x = 0
         self.start_center_y = 0
-        self.setPalette(QtGui.QPalette(QtCore.Qt.white))
+        self.setPalette(QPalette(QColorConstants.White))
         self.setAutoFillBackground(True)
-        QtSvg.QSvgWidget.load(self, path)
+        QSvgWidget.load(self, path)
         self.defViewBox = self.renderer().viewBoxF()
         self.center()
 
     def update_location(self, pos):
-        self.location_changed.emit(QtCore.QPointF(
+        self.location_changed.emit(QPointF(
             (pos.x() - self.width() / 2) * self.scale + self.center_x,
             (pos.y() - self.height() / 2) * self.scale + self.center_y))
 
@@ -140,7 +105,7 @@ class SvgWidget(QtSvg.QSvgWidget):
         self.ds = None
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QMainWindow):
 
     def show_location(self, point):
         self.statusbar.showMessage(f"{point.x()} {point.y()}")
@@ -175,7 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.tabs.setCurrentIndex((self.tabs.currentIndex() - 1) % self.tabs.count())
 
     def open(self):
-        path = QtWidgets.QFileDialog.getOpenFileName(
+        path = QFileDialog.getOpenFileName(
             self,
             "Open File",
             filter="Svg documents (*.svg);;Any files (*.*)"
@@ -184,36 +149,36 @@ class MainWindow(QtWidgets.QMainWindow):
             self.load(path)
 
     def create_actions(self):
-        self.actions[ActionTypes.OPEN] = QtWidgets.QAction(self)
-        self.actions[ActionTypes.OPEN].setShortcuts(QtGui.QKeySequence.Open)
-        self.actions[ActionTypes.QUIT] = QtWidgets.QAction(self)
-        self.actions[ActionTypes.QUIT].setShortcuts(QtGui.QKeySequence.Quit)
-        self.actions[ActionTypes.CLOSE] = QtWidgets.QAction(self)
-        self.actions[ActionTypes.CLOSE].setShortcuts(QtGui.QKeySequence.Close)
-        self.actions[ActionTypes.CENTER] = QtWidgets.QAction(self)
-        self.actions[ActionTypes.CENTER].setShortcuts(QtGui.QKeySequence("Space"))
-        self.actions[ActionTypes.RELOAD] = QtWidgets.QAction(self)
-        self.actions[ActionTypes.RELOAD].setShortcuts(QtGui.QKeySequence("F5"))
-        self.actions[ActionTypes.NEXT] = QtWidgets.QAction(self)
-        self.actions[ActionTypes.NEXT].setShortcuts(QtGui.QKeySequence("Page Down"))
-        self.actions[ActionTypes.PREV] = QtWidgets.QAction(self)
-        self.actions[ActionTypes.PREV].setShortcuts(QtGui.QKeySequence("Page Up"))
+        self.actions[ActionTypes.OPEN] = QAction(self)
+        # self.actions[ActionTypes.OPEN].setShortcuts(QKeySequence("Open"))
+        self.actions[ActionTypes.QUIT] = QAction(self)
+        # self.actions[ActionTypes.QUIT].setShortcuts(QKeySequence("Quit"))
+        self.actions[ActionTypes.CLOSE] = QAction(self)
+        # self.actions[ActionTypes.CLOSE].setShortcuts(QKeySequence("Close"))
+        self.actions[ActionTypes.CENTER] = QAction(self)
+        # self.actions[ActionTypes.CENTER].setShortcuts(QKeySequence("Space"))
+        self.actions[ActionTypes.RELOAD] = QAction(self)
+        # self.actions[ActionTypes.RELOAD].setShortcuts(QKeySequence("F5"))
+        self.actions[ActionTypes.NEXT] = QAction(self)
+        # self.actions[ActionTypes.NEXT].setShortcuts(QKeySequence("Page Down"))
+        self.actions[ActionTypes.PREV] = QAction(self)
+        # self.actions[ActionTypes.PREV].setShortcuts(QKeySequence("Page Up"))
 
     def __init__(self):
-        QtWidgets.QMainWindow.__init__(self)
-        self.tabs = QtWidgets.QTabWidget(self)
+        QMainWindow.__init__(self)
+        self.tabs = QTabWidget(self)
         self.tabs.setMovable(True)
         self.tabs.setTabsClosable(True)
-        self.tabs.tabCloseRequested.connect(self.tab_close, None)
+        # self.tabs.tabCloseRequested.connect(self.tab_close, None)
         self.setCentralWidget(self.tabs)
         self.resize(800, 600)
-        self.statusbar = QtWidgets.QStatusBar(self)
+        self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
         self.actions = {}
 
-        self.menubar = QtWidgets.QMenuBar(self)
-        self.menuFile = QtWidgets.QMenu(self.menubar)
-        self.menuEdit = QtWidgets.QMenu(self.menubar)
+        self.menubar = QMenuBar(self)
+        self.menuFile = QMenu(self.menubar)
+        self.menuEdit = QMenu(self.menubar)
         self.setMenuBar(self.menubar)
 
         self.create_actions()
@@ -229,30 +194,30 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
 
-        self.actionCenter.triggered.connect(self.center)
-        self.actionReload.triggered.connect(self.reload)
-        self.actionNext.triggered.connect(self.tab_next)
-        self.actionPrev.triggered.connect(self.tab_prev)
-        self.actionQuit.triggered.connect(self.close)
-        self.actionOpen.triggered.connect(self.open)
-        self.actionClose.triggered.connect(self.tab_close)
+        self.actions[ActionTypes.CENTER].triggered.connect(self.center)
+        self.actions[ActionTypes.RELOAD].triggered.connect(self.reload)
+        self.actions[ActionTypes.NEXT].triggered.connect(self.tab_next)
+        self.actions[ActionTypes.PREV].triggered.connect(self.tab_prev)
+        self.actions[ActionTypes.QUIT].triggered.connect(self.close)
+        self.actions[ActionTypes.OPEN].triggered.connect(self.open)
+        self.actions[ActionTypes.CLOSE].triggered.connect(self.tab_close)
 
         self.setWindowTitle("Svg Viewer")
         self.menuFile.setTitle("&File")
         self.menuEdit.setTitle("&Edit")
-        self.actionOpen.setText("&Open")
-        self.actionClose.setText("&Close Tab")
-        self.actionQuit.setText("&Quit")
-        self.actionCenter.setText("&Center")
-        self.actionReload.setText("&Reload")
-        self.actionNext.setText("&Next Tab")
-        self.actionPrev.setText("&Prev Tab")
+        self.actions[ActionTypes.OPEN].setText("&Open")
+        self.actions[ActionTypes.CLOSE].setText("&Close Tab")
+        self.actions[ActionTypes.QUIT].setText("&Quit")
+        self.actions[ActionTypes.CENTER].setText("&Center")
+        self.actions[ActionTypes.RELOAD].setText("&Reload")
+        self.actions[ActionTypes.NEXT].setText("&Next Tab")
+        self.actions[ActionTypes.PREV].setText("&Prev Tab")
 
 
 def view_svgs(filenames: List[str]):
-    app = QtWidgets.QApplication(sys.argv)
-    SignalWakeupHandler(app)
-    signal.signal(signal.SIGINT, lambda sig, _: app.quit())
+    app = QApplication(sys.argv)
+    # SignalWakeupHandler(app)
+    # signal.signal(signal.SIGINT, lambda sig, _: app.quit())
 
     window = MainWindow()
     window.show()
@@ -260,4 +225,4 @@ def view_svgs(filenames: List[str]):
     for filename in filenames:
         window.load(filename)
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
