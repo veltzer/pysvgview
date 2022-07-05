@@ -34,6 +34,7 @@ setuptools.setup(
     ],
     install_requires=[
         'PyQt6',
+        'PySide6',
         'pytconf',
         'pylogconf',
     ],

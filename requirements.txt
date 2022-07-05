@@ -1,6 +1,7 @@
 # THIS IS AN AUTO-GENERATED FILE. DO NOT EDIT!
 # production requirements
 PyQt6
+PySide6
 pytconf
 pylogconf
 # dev requirements
@@ -14,3 +15,4 @@ pytest
 pytest-cov
 flake8
 pymakehelper
+mypy
