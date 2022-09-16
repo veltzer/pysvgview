@@ -1,0 +1,5 @@
+- switch to QWebEngineView as suggested in a discussion on the githuh at:
+	https://github.com/veltzer/pysvgview/issues/1
+
+	example is at:
+	http://mikush.in/blog/2022/09/08/qwebengineview-remains-blank-whatever-i-do/
