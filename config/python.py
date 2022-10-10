@@ -2,9 +2,12 @@ console_scripts = [
     "pysvgview=pysvgview.main:main",
 ]
 dev_requires = [
-    "pyclassifiers",
     "pypitools",
+]
+make_requires = [
+    "pyclassifiers",
     "pydmt",
+    "pymakehelper",
     "Sphinx",
 ]
 install_requires = [
@@ -19,6 +22,5 @@ test_requires = [
     "pytest",
     "pytest-cov",
     "flake8",
-    "pymakehelper",
     "mypy",
 ]
