@@ -4,11 +4,3 @@ PyQt6
 PySide6
 pytconf
 pylogconf
-# dev requirements
-pypitools
-# test requirements
-pylint
-pytest
-pytest-cov
-flake8
-mypy
