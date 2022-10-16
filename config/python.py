@@ -8,7 +8,7 @@ make_requires = [
     "pyclassifiers",
     "pydmt",
     "pymakehelper",
-    "Sphinx",
+    "sphinx",
 ]
 install_requires = [
     # "PyQt6-stubs",
