@@ -4,9 +4,11 @@ from typing import List
 console_scripts: List[str] = [
     "pysvgview=pysvgview.main:main",
 ]
-config_requires: List[str] = []
 dev_requires: List[str] = [
     "pypitools",
+]
+config_requires: List[str] = [
+    "pyclassifiers",
 ]
 install_requires: List[str] = [
     # "PyQt6-stubs",
@@ -16,7 +18,6 @@ install_requires: List[str] = [
     "pylogconf",
 ]
 make_requires: List[str] = [
-    "pyclassifiers",
     "pydmt",
     "pymakehelper",
 ]
