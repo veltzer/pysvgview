@@ -6,7 +6,6 @@ svg_view.py
 import enum
 import os
 import sys
-from typing import List
 
 # pylint: disable=no-name-in-module
 from PySide6.QtSvgWidgets import QSvgWidget
