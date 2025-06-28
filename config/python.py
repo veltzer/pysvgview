@@ -1,8 +1,8 @@
 """ python deps for this project """
 
-console_scripts: list[str] = [
-    "pysvgview=pysvgview.main:main",
-]
+scripts: dict[str,str] = {
+    "pysvgview": "pysvgview.main:main",
+}
 
 config_requires: list[str] = [
     "pyclassifiers",

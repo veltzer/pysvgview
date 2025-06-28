@@ -1,13 +1,12 @@
 # THIS IS AN AUTO-GENERATED FILE. DO NOT EDIT!
-pyclassifiers
 PyQt6
 PySide6
-pytconf
-pylogconf
+mypy
+pyclassifiers
 pydmt
-pymakehelper
 pylint
+pylogconf
+pymakehelper
+pytconf
 pytest
 pytest-cov
-flake8
-mypy
