@@ -219,7 +219,7 @@ class MainWindow(QMainWindow):
         self.actions[ActionTypes.PREV].setText("&Prev Tab")
 
 
-def view_svgs(filenames: List[str]):
+def view_svgs(filenames: list[str]):
     app = QApplication(sys.argv)
     # SignalWakeupHandler(app)
     # signal.signal(signal.SIGINT, lambda sig, _: app.quit())
