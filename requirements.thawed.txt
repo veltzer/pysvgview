@@ -1,7 +1,6 @@
 # THIS IS AN AUTO-GENERATED FILE. DO NOT EDIT!
 PyQt6
 PySide6
-hatch
 mypy
 pyclassifiers
 pycmdtools
