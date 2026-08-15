@@ -7,11 +7,14 @@ import enum
 import os
 import sys
 
+# pylint cannot introspect the Qt compiled extension modules, so every name
+# imported from them reads as missing. Keep this disable above the whole Qt
+# import block — import sorting will not separate it from what it covers.
 # pylint: disable=no-name-in-module
+from PyQt6.QtCore import QFileSystemWatcher, QPointF, QRectF, pyqtSignal
+from PyQt6.QtGui import QAction, QColorConstants, QPalette
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMenu, QMenuBar, QStatusBar, QTabWidget
 from PySide6.QtSvgWidgets import QSvgWidget
-from PyQt6.QtWidgets import QMenuBar, QMenu, QMainWindow, QFileDialog, QStatusBar, QTabWidget, QApplication
-from PyQt6.QtCore import pyqtSignal, QPointF, QRectF, QFileSystemWatcher
-from PyQt6.QtGui import QAction, QPalette, QColorConstants
 
 
 class ActionTypes(enum.Enum):

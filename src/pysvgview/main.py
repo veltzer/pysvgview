@@ -2,9 +2,9 @@
 main
 """
 import pylogconf.core
-from pytconf import register_endpoint, get_free_args, register_main, config_arg_parse_and_launch
+from pytconf import config_arg_parse_and_launch, get_free_args, register_endpoint, register_main
 
-from pysvgview.static import DESCRIPTION, APP_NAME, VERSION_STR
+from pysvgview.static import APP_NAME, DESCRIPTION, VERSION_STR
 from pysvgview.svg_view import view_svgs
 
 
