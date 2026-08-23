@@ -5,3 +5,4 @@ KEYWORDS = {
     "view",
     "qt",
 }
+PYPI = true
