@@ -49,3 +49,13 @@ src_dirs = [".github/workflows"]
 # actionlint 1.7.12's runner-label list predates the official ubuntu-26.04
 # hosted runner; drop this ignore once a newer actionlint knows the label
 args = ["-ignore", 'label "ubuntu-26\.04" is unknown']
+
+# System libraries PyQt6 loads at import time; the hosted runner is
+# headless and ships without them, so pytest's import of the package
+# fails with "libEGL.so.1: cannot open shared object file" otherwise.
+[dependencies]
+system = [
+	"libegl1",
+	"libgl1",
+	"libxkbcommon0",
+]
