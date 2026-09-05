@@ -53,3 +53,8 @@ system = [
 	"libgl1",
 	"libxkbcommon0",
 ]
+
+# ─── markdown ────────────────────────────────────────────────────────────────
+
+[processor.rumdl]
+src_files = ["README.md"]
