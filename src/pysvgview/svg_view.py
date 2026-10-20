@@ -13,8 +13,8 @@ import sys
 # pylint: disable=no-name-in-module
 from PyQt6.QtCore import QFileSystemWatcher, QPointF, QRectF, pyqtSignal
 from PyQt6.QtGui import QAction, QColorConstants, QPalette
+from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMenu, QMenuBar, QStatusBar, QTabWidget
-from PySide6.QtSvgWidgets import QSvgWidget
 
 
 class ActionTypes(enum.Enum):

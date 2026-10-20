@@ -33,7 +33,6 @@ classifiers = [
 ]
 dependencies = [
     "PyQt6",
-    "PySide6",
     "pytconf",
     "pylogconf",
 ]

@@ -4,7 +4,6 @@ Findings from a code scan on 2026-10-04.
 
 ## High
 
-- `src/pysvgview/svg_view.py:17` - `QSvgWidget` comes from PySide6 while every other Qt class (QApplication, QTabWidget, pyqtSignal, ...) comes from PyQt6. The two bindings cannot be mixed: `QTabWidget.addTab()` in `MainWindow.load()` (line 122) rejects the widget with `TypeError: argument 1 has unexpected type 'PySide6.QtSvgWidgets.QSvgWidget'` (reproduced in the repo venv), so the viewer cannot open any file. Import `QSvgWidget` from `PyQt6.QtSvgWidgets` (available in the installed PyQt6) and drop `PySide6` from `pyproject.toml:36`.
 - `src/pysvgview/svg_view.py:82` - `wheelEvent` calls `evt.pos()`, which does not exist on Qt6 `QWheelEvent` (removed in Qt 6; `hasattr(QWheelEvent, "pos")` is False for both PyQt6 and PySide6), so every mouse-wheel zoom raises AttributeError. Use `evt.position()` (QPointF) here and at line 90; the `QMouseEvent.pos()` calls at lines 94-104 are deprecated in Qt6 too.
 - `src/pysvgview/svg_view.py:150` - `QFileDialog.getOpenFileName()` returns a `(path, selected_filter)` tuple, so `if path:` is always true and `self.load(path)` passes a tuple to `SvgWidget`, breaking File > Open (and cancelling the dialog also "loads" `('', '')`). Unpack: `path, _ = QFileDialog.getOpenFileName(...)`.
 
