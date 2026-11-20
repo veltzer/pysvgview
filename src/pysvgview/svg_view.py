@@ -28,7 +28,7 @@ class ActionTypes(enum.Enum):
 
 
 class SvgWidget(QSvgWidget):
-    location_changed = pyqtSignal(QPointF)
+    location_changed = pyqtSignal(QPointF, arguments=["location"])
 
     def update_view_box(self, size):
         w = self.scale * size.width()
