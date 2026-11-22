@@ -5,7 +5,7 @@
 
 description: pysvgview is an SVG viewer
 
-project website: https://veltzer.github.io/pysvgview
+project website: <https://veltzer.github.io/pysvgview>
 
 author: Mark Veltzer
 
