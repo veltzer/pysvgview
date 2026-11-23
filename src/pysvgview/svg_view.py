@@ -6,13 +6,14 @@ svg_view.py
 import enum
 import os
 import sys
+import typing
 
 # pylint cannot introspect the Qt compiled extension modules, so every name
 # imported from them reads as missing. Keep this disable above the whole Qt
 # import block — import sorting will not separate it from what it covers.
 # pylint: disable=no-name-in-module
 from PyQt6.QtCore import QFileSystemWatcher, QPointF, QRectF, pyqtSignal
-from PyQt6.QtGui import QAction, QColorConstants, QPalette
+from PyQt6.QtGui import QAction, QColorConstants, QMouseEvent, QPalette, QResizeEvent, QWheelEvent
 from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMenu, QMenuBar, QStatusBar, QTabWidget
 
@@ -34,7 +35,14 @@ class SvgWidget(QSvgWidget):
         w = self.scale * size.width()
         h = self.scale * size.height()
         r = QRectF(self.center_x - w / 2, self.center_y - h / 2, w, h)
-        self.renderer().setViewBox(r)
+        renderer = self.renderer()
+        if renderer is not None:
+            renderer.setViewBox(r)
+
+    def _load_def_view_box(self):
+        renderer = self.renderer()
+        if renderer is not None:
+            self.defViewBox = renderer.viewBoxF()
 
     def center(self):
         self.scale = max(float(self.defViewBox.width()) / self.width(),
@@ -46,31 +54,34 @@ class SvgWidget(QSvgWidget):
 
     def reload(self):
         QSvgWidget.load(self, self.path)
-        self.defViewBox = self.renderer().viewBoxF()
+        self._load_def_view_box()
         self.update_view_box(self.size())
 
-    def resizeEvent(self, evt):
-        self.update_view_box(evt.size())
-        QSvgWidget.resizeEvent(self, evt)
+    @typing.override
+    def resizeEvent(self, a0: QResizeEvent | None):
+        if a0 is not None:
+            self.update_view_box(a0.size())
+        QSvgWidget.resizeEvent(self, a0)
 
     def __init__(self, path):
         QSvgWidget.__init__(self)
         self.path = path
         self.watch = QFileSystemWatcher(self)
         self.watch.addPath(self.path)
-        self.watch.fileChanged.connect(self.reload, None)
+        self.watch.fileChanged.connect(self.reload)
 
         self.setMouseTracking(True)
         self.ds = None
-        self.scale = 0
-        self.center_x = 0
-        self.center_y = 0
-        self.start_center_x = 0
-        self.start_center_y = 0
+        self.scale = 0.0
+        self.center_x = 0.0
+        self.center_y = 0.0
+        self.start_center_x = 0.0
+        self.start_center_y = 0.0
         self.setPalette(QPalette(QColorConstants.White))
         self.setAutoFillBackground(True)
         QSvgWidget.load(self, path)
-        self.defViewBox = self.renderer().viewBoxF()
+        self.defViewBox = QRectF()
+        self._load_def_view_box()
         self.center()
 
     def update_location(self, pos):
@@ -78,24 +89,36 @@ class SvgWidget(QSvgWidget):
             (pos.x() - self.width() / 2) * self.scale + self.center_x,
             (pos.y() - self.height() / 2) * self.scale + self.center_y))
 
-    def wheelEvent(self, evt):
-        dx = evt.pos().x() - self.width() / 2
-        dy = evt.pos().y() - self.height() / 2
+    @typing.override
+    def wheelEvent(self, a0: QWheelEvent | None):
+        evt = a0
+        if evt is None:
+            return
+        dx = evt.position().toPoint().x() - self.width() / 2
+        dy = evt.position().toPoint().y() - self.height() / 2
         center_x = self.center_x + dx * self.scale
         center_y = self.center_y + dy * self.scale
         self.scale = self.scale * 1.0025 ** (-evt.angleDelta().y())
         self.center_x = center_x - dx * self.scale
         self.center_y = center_y - dy * self.scale
         self.update_view_box(self.size())
-        self.update_location(evt.pos())
+        self.update_location(evt.position().toPoint())
         self.repaint()
 
-    def mousePressEvent(self, evt):
+    @typing.override
+    def mousePressEvent(self, a0: QMouseEvent | None):
+        evt = a0
+        if evt is None:
+            return
         self.ds = evt.pos()
         self.start_center_x = self.center_x
         self.start_center_y = self.center_y
 
-    def mouseMoveEvent(self, evt):
+    @typing.override
+    def mouseMoveEvent(self, a0: QMouseEvent | None):
+        evt = a0
+        if evt is None:
+            return
         # print(dir(evt))
         self.update_location(evt.pos())
         if not self.ds:
@@ -107,8 +130,9 @@ class SvgWidget(QSvgWidget):
         self.update_view_box(self.size())
         self.repaint()
 
-    def mouseReleaseEvent(self, evt):
-        self.mouseMoveEvent(evt)
+    @typing.override
+    def mouseReleaseEvent(self, a0: QMouseEvent | None):
+        self.mouseMoveEvent(a0)
         self.ds = None
 
 
@@ -127,14 +151,14 @@ class MainWindow(QMainWindow):
         self.tabs.removeTab(self.tabs.currentIndex())
 
     def center(self):
-        if not self.tabs.currentWidget():
-            return
-        self.tabs.currentWidget().center()
+        view = self.tabs.currentWidget()
+        if isinstance(view, SvgWidget):
+            view.center()
 
     def reload(self):
-        if not self.tabs.currentWidget():
-            return
-        self.tabs.currentWidget().reload()
+        view = self.tabs.currentWidget()
+        if isinstance(view, SvgWidget):
+            view.reload()
 
     def tab_next(self):
         if not self.tabs.currentWidget():
@@ -147,7 +171,7 @@ class MainWindow(QMainWindow):
         self.tabs.setCurrentIndex((self.tabs.currentIndex() - 1) % self.tabs.count())
 
     def open(self):
-        path = QFileDialog.getOpenFileName(
+        path, _ = QFileDialog.getOpenFileName(
             self,
             "Open File",
             filter="Svg documents (*.svg);;Any files (*.*)"
@@ -156,20 +180,20 @@ class MainWindow(QMainWindow):
             self.load(path)
 
     def create_actions(self):
-        self.actions[ActionTypes.OPEN] = QAction(self)
-        # self.actions[ActionTypes.OPEN].setShortcuts(QKeySequence("Open"))
-        self.actions[ActionTypes.QUIT] = QAction(self)
-        # self.actions[ActionTypes.QUIT].setShortcuts(QKeySequence("Quit"))
-        self.actions[ActionTypes.CLOSE] = QAction(self)
-        # self.actions[ActionTypes.CLOSE].setShortcuts(QKeySequence("Close"))
-        self.actions[ActionTypes.CENTER] = QAction(self)
-        # self.actions[ActionTypes.CENTER].setShortcuts(QKeySequence("Space"))
-        self.actions[ActionTypes.RELOAD] = QAction(self)
-        # self.actions[ActionTypes.RELOAD].setShortcuts(QKeySequence("F5"))
-        self.actions[ActionTypes.NEXT] = QAction(self)
-        # self.actions[ActionTypes.NEXT].setShortcuts(QKeySequence("Page Down"))
-        self.actions[ActionTypes.PREV] = QAction(self)
-        # self.actions[ActionTypes.PREV].setShortcuts(QKeySequence("Page Up"))
+        self.action_map[ActionTypes.OPEN] = QAction(self)
+        # self.action_map[ActionTypes.OPEN].setShortcuts(QKeySequence("Open"))
+        self.action_map[ActionTypes.QUIT] = QAction(self)
+        # self.action_map[ActionTypes.QUIT].setShortcuts(QKeySequence("Quit"))
+        self.action_map[ActionTypes.CLOSE] = QAction(self)
+        # self.action_map[ActionTypes.CLOSE].setShortcuts(QKeySequence("Close"))
+        self.action_map[ActionTypes.CENTER] = QAction(self)
+        # self.action_map[ActionTypes.CENTER].setShortcuts(QKeySequence("Space"))
+        self.action_map[ActionTypes.RELOAD] = QAction(self)
+        # self.action_map[ActionTypes.RELOAD].setShortcuts(QKeySequence("F5"))
+        self.action_map[ActionTypes.NEXT] = QAction(self)
+        # self.action_map[ActionTypes.NEXT].setShortcuts(QKeySequence("Page Down"))
+        self.action_map[ActionTypes.PREV] = QAction(self)
+        # self.action_map[ActionTypes.PREV].setShortcuts(QKeySequence("Page Up"))
 
     def __init__(self):
         QMainWindow.__init__(self)
@@ -181,7 +205,7 @@ class MainWindow(QMainWindow):
         self.resize(800, 600)
         self.statusbar = QStatusBar(self)
         self.setStatusBar(self.statusbar)
-        self.actions = {}
+        self.action_map: dict[ActionTypes, QAction] = {}
 
         self.menubar = QMenuBar(self)
         self.menuFile = QMenu(self.menubar)
@@ -190,35 +214,35 @@ class MainWindow(QMainWindow):
 
         self.create_actions()
 
-        self.menuFile.addAction(self.actions[ActionTypes.OPEN])
+        self.menuFile.addAction(self.action_map[ActionTypes.OPEN])
         self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actions[ActionTypes.CLOSE])
-        self.menuFile.addAction(self.actions[ActionTypes.CLOSE])
-        self.menuEdit.addAction(self.actions[ActionTypes.CENTER])
-        self.menuEdit.addAction(self.actions[ActionTypes.RELOAD])
-        self.menuEdit.addAction(self.actions[ActionTypes.NEXT])
-        self.menuEdit.addAction(self.actions[ActionTypes.PREV])
+        self.menuFile.addAction(self.action_map[ActionTypes.CLOSE])
+        self.menuFile.addAction(self.action_map[ActionTypes.CLOSE])
+        self.menuEdit.addAction(self.action_map[ActionTypes.CENTER])
+        self.menuEdit.addAction(self.action_map[ActionTypes.RELOAD])
+        self.menuEdit.addAction(self.action_map[ActionTypes.NEXT])
+        self.menuEdit.addAction(self.action_map[ActionTypes.PREV])
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
 
-        self.actions[ActionTypes.CENTER].triggered.connect(self.center)
-        self.actions[ActionTypes.RELOAD].triggered.connect(self.reload)
-        self.actions[ActionTypes.NEXT].triggered.connect(self.tab_next)
-        self.actions[ActionTypes.PREV].triggered.connect(self.tab_prev)
-        self.actions[ActionTypes.QUIT].triggered.connect(self.close)
-        self.actions[ActionTypes.OPEN].triggered.connect(self.open)
-        self.actions[ActionTypes.CLOSE].triggered.connect(self.tab_close)
+        self.action_map[ActionTypes.CENTER].triggered.connect(self.center)
+        self.action_map[ActionTypes.RELOAD].triggered.connect(self.reload)
+        self.action_map[ActionTypes.NEXT].triggered.connect(self.tab_next)
+        self.action_map[ActionTypes.PREV].triggered.connect(self.tab_prev)
+        self.action_map[ActionTypes.QUIT].triggered.connect(self.close)
+        self.action_map[ActionTypes.OPEN].triggered.connect(self.open)
+        self.action_map[ActionTypes.CLOSE].triggered.connect(self.tab_close)
 
         self.setWindowTitle("Svg Viewer")
         self.menuFile.setTitle("&File")
         self.menuEdit.setTitle("&Edit")
-        self.actions[ActionTypes.OPEN].setText("&Open")
-        self.actions[ActionTypes.CLOSE].setText("&Close Tab")
-        self.actions[ActionTypes.QUIT].setText("&Quit")
-        self.actions[ActionTypes.CENTER].setText("&Center")
-        self.actions[ActionTypes.RELOAD].setText("&Reload")
-        self.actions[ActionTypes.NEXT].setText("&Next Tab")
-        self.actions[ActionTypes.PREV].setText("&Prev Tab")
+        self.action_map[ActionTypes.OPEN].setText("&Open")
+        self.action_map[ActionTypes.CLOSE].setText("&Close Tab")
+        self.action_map[ActionTypes.QUIT].setText("&Quit")
+        self.action_map[ActionTypes.CENTER].setText("&Center")
+        self.action_map[ActionTypes.RELOAD].setText("&Reload")
+        self.action_map[ActionTypes.NEXT].setText("&Next Tab")
+        self.action_map[ActionTypes.PREV].setText("&Prev Tab")
 
 
 def view_svgs(filenames: list[str]):
