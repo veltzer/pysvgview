@@ -11,7 +11,6 @@ import typing
 # pylint cannot introspect the Qt compiled extension modules, so every name
 # imported from them reads as missing. Keep this disable above the whole Qt
 # import block — import sorting will not separate it from what it covers.
-# pylint: disable=no-name-in-module
 from PyQt6.QtCore import QFileSystemWatcher, QPointF, QRectF, pyqtSignal
 from PyQt6.QtGui import QAction, QColorConstants, QMouseEvent, QPalette, QResizeEvent, QWheelEvent
 from PyQt6.QtSvgWidgets import QSvgWidget
