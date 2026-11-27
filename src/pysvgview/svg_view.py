@@ -118,7 +118,6 @@ class SvgWidget(QSvgWidget):
         evt = a0
         if evt is None:
             return
-        # print(dir(evt))
         self.update_location(evt.pos())
         if not self.ds:
             return
@@ -180,26 +179,18 @@ class MainWindow(QMainWindow):
 
     def create_actions(self):
         self.action_map[ActionTypes.OPEN] = QAction(self)
-        # self.action_map[ActionTypes.OPEN].setShortcuts(QKeySequence("Open"))
         self.action_map[ActionTypes.QUIT] = QAction(self)
-        # self.action_map[ActionTypes.QUIT].setShortcuts(QKeySequence("Quit"))
         self.action_map[ActionTypes.CLOSE] = QAction(self)
-        # self.action_map[ActionTypes.CLOSE].setShortcuts(QKeySequence("Close"))
         self.action_map[ActionTypes.CENTER] = QAction(self)
-        # self.action_map[ActionTypes.CENTER].setShortcuts(QKeySequence("Space"))
         self.action_map[ActionTypes.RELOAD] = QAction(self)
-        # self.action_map[ActionTypes.RELOAD].setShortcuts(QKeySequence("F5"))
         self.action_map[ActionTypes.NEXT] = QAction(self)
-        # self.action_map[ActionTypes.NEXT].setShortcuts(QKeySequence("Page Down"))
         self.action_map[ActionTypes.PREV] = QAction(self)
-        # self.action_map[ActionTypes.PREV].setShortcuts(QKeySequence("Page Up"))
 
     def __init__(self):
         QMainWindow.__init__(self)
         self.tabs = QTabWidget(self)
         self.tabs.setMovable(True)
         self.tabs.setTabsClosable(True)
-        # self.tabs.tabCloseRequested.connect(self.tab_close, None)
         self.setCentralWidget(self.tabs)
         self.resize(800, 600)
         self.statusbar = QStatusBar(self)
@@ -246,8 +237,6 @@ class MainWindow(QMainWindow):
 
 def view_svgs(filenames: list[str]):
     app = QApplication(sys.argv)
-    # SignalWakeupHandler(app)
-    # signal.signal(signal.SIGINT, lambda sig, _: app.quit())
 
     window = MainWindow()
     window.show()
