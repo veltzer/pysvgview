@@ -11,7 +11,7 @@ import typing
 # pylint cannot introspect the Qt compiled extension modules, so every name
 # imported from them reads as missing. Keep this disable above the whole Qt
 # import block — import sorting will not separate it from what it covers.
-from PyQt6.QtCore import QFileSystemWatcher, QPoint, QPointF, QRectF, pyqtSignal
+from PyQt6.QtCore import QFileSystemWatcher, QPoint, QPointF, QRectF, QSize, pyqtSignal
 from PyQt6.QtGui import QAction, QColorConstants, QMouseEvent, QPalette, QResizeEvent, QWheelEvent
 from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMenu, QMenuBar, QStatusBar, QTabWidget
@@ -30,7 +30,7 @@ class ActionTypes(enum.Enum):
 class SvgWidget(QSvgWidget):
     location_changed = pyqtSignal(QPointF, arguments=["location"])
 
-    def update_view_box(self, size):
+    def update_view_box(self, size: QSize) -> None:
         w = self.scale * size.width()
         h = self.scale * size.height()
         r = QRectF(self.center_x - w / 2, self.center_y - h / 2, w, h)
@@ -38,12 +38,12 @@ class SvgWidget(QSvgWidget):
         if renderer is not None:
             renderer.setViewBox(r)
 
-    def _load_def_view_box(self):
+    def _load_def_view_box(self) -> None:
         renderer = self.renderer()
         if renderer is not None:
             self.defViewBox = renderer.viewBoxF()
 
-    def center(self):
+    def center(self) -> None:
         self.scale = max(float(self.defViewBox.width()) / self.width(),
                          float(self.defViewBox.height()) / self.height())
         self.center_x = self.defViewBox.center().x()
@@ -51,18 +51,18 @@ class SvgWidget(QSvgWidget):
         self.update_view_box(self.size())
         self.repaint()
 
-    def reload(self):
+    def reload(self) -> None:
         QSvgWidget.load(self, self.path)
         self._load_def_view_box()
         self.update_view_box(self.size())
 
     @typing.override
-    def resizeEvent(self, a0: QResizeEvent | None):
+    def resizeEvent(self, a0: QResizeEvent | None) -> None:
         if a0 is not None:
             self.update_view_box(a0.size())
         QSvgWidget.resizeEvent(self, a0)
 
-    def __init__(self, path):
+    def __init__(self, path: str) -> None:
         QSvgWidget.__init__(self)
         self.path = path
         self.watch = QFileSystemWatcher(self)
@@ -83,13 +83,13 @@ class SvgWidget(QSvgWidget):
         self._load_def_view_box()
         self.center()
 
-    def update_location(self, pos):
+    def update_location(self, pos: QPoint) -> None:
         self.location_changed.emit(QPointF(
             (pos.x() - self.width() / 2) * self.scale + self.center_x,
             (pos.y() - self.height() / 2) * self.scale + self.center_y))
 
     @typing.override
-    def wheelEvent(self, a0: QWheelEvent | None):
+    def wheelEvent(self, a0: QWheelEvent | None) -> None:
         evt = a0
         if evt is None:
             return
@@ -105,7 +105,7 @@ class SvgWidget(QSvgWidget):
         self.repaint()
 
     @typing.override
-    def mousePressEvent(self, a0: QMouseEvent | None):
+    def mousePressEvent(self, a0: QMouseEvent | None) -> None:
         evt = a0
         if evt is None:
             return
@@ -114,7 +114,7 @@ class SvgWidget(QSvgWidget):
         self.start_center_y = self.center_y
 
     @typing.override
-    def mouseMoveEvent(self, a0: QMouseEvent | None):
+    def mouseMoveEvent(self, a0: QMouseEvent | None) -> None:
         evt = a0
         if evt is None:
             return
@@ -129,46 +129,46 @@ class SvgWidget(QSvgWidget):
         self.repaint()
 
     @typing.override
-    def mouseReleaseEvent(self, a0: QMouseEvent | None):
+    def mouseReleaseEvent(self, a0: QMouseEvent | None) -> None:
         self.mouseMoveEvent(a0)
         self.ds = None
 
 
 class MainWindow(QMainWindow):
 
-    def show_location(self, point):
+    def show_location(self, point: QPointF) -> None:
         self.statusbar.showMessage(f"{point.x()} {point.y()}")
 
-    def load(self, path):
+    def load(self, path: str) -> None:
         view = SvgWidget(path)
         self.tabs.setCurrentIndex(self.tabs.addTab(view, os.path.basename(path)))
 
-    def tab_close(self):
+    def tab_close(self) -> None:
         if not self.tabs.currentWidget():
             return
         self.tabs.removeTab(self.tabs.currentIndex())
 
-    def center(self):
+    def center(self) -> None:
         view = self.tabs.currentWidget()
         if isinstance(view, SvgWidget):
             view.center()
 
-    def reload(self):
+    def reload(self) -> None:
         view = self.tabs.currentWidget()
         if isinstance(view, SvgWidget):
             view.reload()
 
-    def tab_next(self):
+    def tab_next(self) -> None:
         if not self.tabs.currentWidget():
             return
         self.tabs.setCurrentIndex((self.tabs.currentIndex() + 1) % self.tabs.count())
 
-    def tab_prev(self):
+    def tab_prev(self) -> None:
         if not self.tabs.currentWidget():
             return
         self.tabs.setCurrentIndex((self.tabs.currentIndex() - 1) % self.tabs.count())
 
-    def open(self):
+    def open(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
             self,
             "Open File",
@@ -177,7 +177,7 @@ class MainWindow(QMainWindow):
         if path:
             self.load(path)
 
-    def create_actions(self):
+    def create_actions(self) -> None:
         self.action_map[ActionTypes.OPEN] = QAction(self)
         self.action_map[ActionTypes.QUIT] = QAction(self)
         self.action_map[ActionTypes.CLOSE] = QAction(self)
@@ -186,7 +186,7 @@ class MainWindow(QMainWindow):
         self.action_map[ActionTypes.NEXT] = QAction(self)
         self.action_map[ActionTypes.PREV] = QAction(self)
 
-    def __init__(self):
+    def __init__(self) -> None:
         QMainWindow.__init__(self)
         self.tabs = QTabWidget(self)
         self.tabs.setMovable(True)
