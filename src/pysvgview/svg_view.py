@@ -11,7 +11,7 @@ import typing
 # pylint cannot introspect the Qt compiled extension modules, so every name
 # imported from them reads as missing. Keep this disable above the whole Qt
 # import block — import sorting will not separate it from what it covers.
-from PyQt6.QtCore import QFileSystemWatcher, QPointF, QRectF, pyqtSignal
+from PyQt6.QtCore import QFileSystemWatcher, QPoint, QPointF, QRectF, pyqtSignal
 from PyQt6.QtGui import QAction, QColorConstants, QMouseEvent, QPalette, QResizeEvent, QWheelEvent
 from PyQt6.QtSvgWidgets import QSvgWidget
 from PyQt6.QtWidgets import QApplication, QFileDialog, QMainWindow, QMenu, QMenuBar, QStatusBar, QTabWidget
@@ -70,7 +70,7 @@ class SvgWidget(QSvgWidget):
         self.watch.fileChanged.connect(self.reload)
 
         self.setMouseTracking(True)
-        self.ds = None
+        self.ds: QPoint | None = None
         self.scale = 0.0
         self.center_x = 0.0
         self.center_y = 0.0
